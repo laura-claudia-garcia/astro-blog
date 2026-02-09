@@ -1,0 +1,32 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+
+export async function getStaticPaths() {
+  const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL;
+
+  const res = await fetch(`${PAYLOAD_URL}/api/support-pages?limit=200&where[_status][equals]=published`);
+  const data = await res.json();
+
+  return (data.docs ?? []).map((p) => ({
+    params: { slug: p.slug },
+    props: { id: p.id },
+  }));
+}
+
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL;
+const { id } = Astro.props;
+
+const res = await fetch(`${PAYLOAD_URL}/api/support-pages/${id}`);
+const page = await res.json();
+---
+
+<StarlightPage frontmatter={{ title: page.title }}>
+  <article>
+    <h1>{page.title}</h1>
+    <!-- body is Markdown in this approach; simplest first pass is render as preformatted -->
+    <!-- Better: convert Markdown -> HTML using an Astro markdown pipeline -->
+    <div>
+      <pre style="white-space: pre-wrap;">{page.body}</pre>
+    </div>
+  </article>
+</StarlightPage>

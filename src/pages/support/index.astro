@@ -1,0 +1,21 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL;
+
+const res = await fetch(`${PAYLOAD_URL}/api/support-pages?limit=200&sort=category,order`);
+const data = await res.json();
+const pages = data.docs ?? [];
+---
+
+<StarlightPage frontmatter={{ title: 'Support' }}>
+  <h1>Support</h1>
+
+  <ul>
+    {pages.map((p) => (
+      <li>
+        <a href={`/support/${p.slug}`}>{p.title}</a>
+      </li>
+    ))}
+  </ul>
+</StarlightPage>

@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "sync:support": "node --env-file=.env ./scripts/sync-support-docs.mjs",
+    "dev:support": "pnpm sync:support && astro dev",
+    "build:support": "pnpm sync:support && astro build",
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",

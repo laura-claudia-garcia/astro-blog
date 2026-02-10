@@ -1,12 +1,12 @@
 ---
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
-import type { SupportPage } from "../../types/payload.ts";
+import type { PaginatedResponse, SupportPage } from "../../types/payload";
 
 const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL;
 
 const res = await fetch(`${PAYLOAD_URL}/api/support-pages?limit=200&sort=category,order`);
-const data = await res.json();
-const pages = data.docs ?? [];
+const data = (await res.json()) as PaginatedResponse<SupportPage>;
+const pages: SupportPage[] = data.docs ?? [];
 ---
 
 <StarlightPage frontmatter={{ title: 'Support' }}>

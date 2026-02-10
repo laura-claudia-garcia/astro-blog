@@ -3,13 +3,17 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import supportSidebar from './src/generated/support-sidebar.mjs';
 
+import netlify from '@astrojs/netlify';
+
 // https://astro.build/config
 export default defineConfig({
-	integrations: [
-		starlight({
-			title: 'Fusang Support',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
-			sidebar: supportSidebar.length > 0 ? supportSidebar : [{ label: 'Support', autogenerate: { directory: 'support' } }],
-		}),
+  integrations: [
+      starlight({
+          title: 'Fusang Support',
+          social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+          sidebar: supportSidebar.length > 0 ? supportSidebar : [{ label: 'Support', autogenerate: { directory: 'support' } }],
+      }),
 	],
+
+  adapter: netlify(),
 });

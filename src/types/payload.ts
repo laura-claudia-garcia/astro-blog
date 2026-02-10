@@ -17,3 +17,8 @@ export type SupportPage = {
 export type PaginatedResponse<T> = {
   docs?: T[]
 }
+
+export type StaticPath = {
+  params: { slug: string }
+  props: { slug: string; categorySlug: string }
+}

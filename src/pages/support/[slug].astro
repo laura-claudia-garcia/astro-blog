@@ -1,11 +1,8 @@
 ---
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
-import type { PaginatedResponse, SupportCategory, SupportPage } from "../../types/payload";
+import type { PaginatedResponse, SupportCategory, SupportPage, StaticPath } from "../../types/payload";
 
-type StaticPath = {
-  params: { slug: string };
-  props: { slug: string; categorySlug: string };
-};
+
 
 export async function getStaticPaths() {
   const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL;

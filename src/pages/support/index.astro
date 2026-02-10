@@ -31,9 +31,20 @@ const sortedPages = [...pages].sort((a, b) => {
   return String(a.title ?? "").localeCompare(String(b.title ?? ""));
 });
 
-const firstPage = sortedPages.find((page) => Boolean(page.slug));
-if (firstPage?.slug) {
-  return Astro.redirect(`/support/${firstPage.slug}`);
+const firstPageWithCategory = sortedPages.find((page) => {
+  const category = page.category;
+  return Boolean(
+    page.slug &&
+      typeof category === "object" &&
+      category !== null &&
+      (category as SupportCategory).slug,
+  );
+});
+
+if (firstPageWithCategory?.slug && typeof firstPageWithCategory.category === "object") {
+  return Astro.redirect(
+    `/support/${(firstPageWithCategory.category as SupportCategory).slug}/${firstPageWithCategory.slug}`,
+  );
 }
 ---
 

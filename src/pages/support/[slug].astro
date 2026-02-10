@@ -1,40 +1,48 @@
 ---
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
-import type { PaginatedResponse, SupportPage } from "../../types/payload";
+import type { PaginatedResponse, SupportCategory, SupportPage } from "../../types/payload";
 
 type StaticPath = {
   params: { slug: string };
-  props: { id: string };
+  props: { slug: string; categorySlug: string };
 };
 
 export async function getStaticPaths() {
   const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL;
 
-  const res = await fetch(`${PAYLOAD_URL}/api/support-pages?limit=200&where[_status][equals]=published`);
+  const res = await fetch(
+    `${PAYLOAD_URL}/api/support-pages?limit=500&depth=1&where[_status][equals]=published`,
+  );
   const data = (await res.json()) as PaginatedResponse<SupportPage>;
 
   return (data.docs ?? [])
-    .filter((p): p is SupportPage & { id: string; slug: string } => Boolean(p?.id && p?.slug))
+    .filter(
+      (
+        p,
+      ): p is SupportPage & {
+        slug: string;
+        category: SupportCategory;
+      } =>
+        Boolean(
+          p?.slug &&
+            typeof p.category === "object" &&
+            p.category !== null &&
+            (p.category as SupportCategory).slug,
+        ),
+    )
     .map<StaticPath>((p) => ({
       params: { slug: p.slug },
-      props: { id: p.id },
+      props: {
+        slug: p.slug,
+        categorySlug: (p.category as SupportCategory).slug,
+      },
     }));
 }
 
-const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL;
-const { id } = Astro.props as StaticPath["props"];
-
-const res = await fetch(`${PAYLOAD_URL}/api/support-pages/${id}`);
-const page = (await res.json()) as SupportPage;
+const { slug, categorySlug } = Astro.props as StaticPath["props"];
+return Astro.redirect(`/support/${categorySlug}/${slug}`);
 ---
 
-<StarlightPage frontmatter={{ title: page.title ?? "Support Article" }}>
-  <article>
-    <h1>{page.title ?? "Support Article"}</h1>
-    <!-- body is Markdown in this approach; simplest first pass is render as preformatted -->
-    <!-- Better: convert Markdown -> HTML using an Astro markdown pipeline -->
-    <div>
-      <pre style="white-space: pre-wrap;">{page.body ?? ""}</pre>
-    </div>
-  </article>
+<StarlightPage frontmatter={{ title: "Redirecting..." }}>
+  <p>Redirecting…</p>
 </StarlightPage>

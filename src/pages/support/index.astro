@@ -1,22 +1,43 @@
 ---
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
-import type { PaginatedResponse, SupportPage } from "../../types/payload";
+import type { PaginatedResponse, SupportCategory, SupportPage } from "../../types/payload";
 
 const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL;
 
-const res = await fetch(`${PAYLOAD_URL}/api/support-pages?limit=200&sort=category,order`);
+const res = await fetch(
+  `${PAYLOAD_URL}/api/support-pages?limit=500&depth=1&sort=order&where[_status][equals]=published`,
+);
 const data = (await res.json()) as PaginatedResponse<SupportPage>;
 const pages: SupportPage[] = data.docs ?? [];
+
+const sortedPages = [...pages].sort((a, b) => {
+  const categoryA =
+    typeof a.category === "object" && a.category !== null
+      ? (a.category as SupportCategory)
+      : undefined;
+  const categoryB =
+    typeof b.category === "object" && b.category !== null
+      ? (b.category as SupportCategory)
+      : undefined;
+
+  const categoryOrderA = Number.isFinite(Number(categoryA?.order)) ? Number(categoryA?.order) : 0;
+  const categoryOrderB = Number.isFinite(Number(categoryB?.order)) ? Number(categoryB?.order) : 0;
+  if (categoryOrderA !== categoryOrderB) return categoryOrderA - categoryOrderB;
+
+  const pageOrderA = Number.isFinite(Number(a.order)) ? Number(a.order) : 0;
+  const pageOrderB = Number.isFinite(Number(b.order)) ? Number(b.order) : 0;
+  if (pageOrderA !== pageOrderB) return pageOrderA - pageOrderB;
+
+  return String(a.title ?? "").localeCompare(String(b.title ?? ""));
+});
+
+const firstPage = sortedPages.find((page) => Boolean(page.slug));
+if (firstPage?.slug) {
+  return Astro.redirect(`/support/${firstPage.slug}`);
+}
 ---
 
 <StarlightPage frontmatter={{ title: 'Support' }}>
-  <h1>Support</h1>
-
-  <ul>
-    {pages.map((p) => (
-      <li>
-        <a href={`/support/${p.slug}`}>{p.title}</a>
-      </li>
-    ))}
-  </ul>
+  <h1>No support pages found</h1>
+  <p>Add and publish at least one Support Page in Payload.</p>
 </StarlightPage>
